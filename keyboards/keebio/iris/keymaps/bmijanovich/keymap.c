@@ -49,6 +49,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     )
 };
 
+bool get_tapping_force_hold(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case LT(1, KC_SPC):
+            return true;
+        case RSFT_T(KC_ENT):
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool encoder_update_user(uint8_t index, bool clockwise) {
     if (index == 1) { /* Right encoder */
         if (IS_LAYER_ON(2)) { /* Switch browser tabs */
