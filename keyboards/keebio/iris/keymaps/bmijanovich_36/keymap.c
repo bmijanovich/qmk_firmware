@@ -19,7 +19,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
        XXXXXXX, LSFT_T(KC_Z), KC_X, KC_C,  KC_V,    KC_B,    LT(1, KC_SPC),    RGB_TOG, KC_N,    KC_M,    KC_COMM, KC_DOT,  RSFT_T(KC_SLSH), XXXXXXX,
     //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                               LCTL_T(KC_ESC), LGUI_T(KC_TAB), LT(1, KC_SPC), LT(2, KC_BSPC), RGUI_T(KC_ENT), KC_ROPT
+                               LOPT_T(KC_ESC), LGUI_T(KC_TAB), LT(1, KC_SPC), LT(2, KC_BSPC), RGUI_T(KC_ENT), KC_RCTL
                                   // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
     ),
 
@@ -43,9 +43,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
        XXXXXXX, KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC,                            KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, XXXXXXX,
     //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-       XXXXXXX, LT(3, KC_CAPS), KC_MPRV, KC_MPLY, KC_MNXT, KC_EQL,                      KC_MINS, KC_LEFT, KC_UP,   KC_DOWN, KC_RGHT, XXXXXXX,
+       XXXXXXX, LT(3, KC_CAPS), KC_MPRV, KC_MPLY, KC_MNXT, KC_PLUS,                     KC_UNDS, KC_LEFT, KC_UP,   KC_DOWN, KC_RGHT, XXXXXXX,
     //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-       XXXXXXX, KC_LSPO, KC_MUTE, KC_VOLD, KC_VOLU, KC_GRV,  _______,          _______, KC_BSLS, KC_SCLN, KC_LBRC, KC_RBRC, KC_RSPC, XXXXXXX,
+       XXXXXXX, KC_LSPO, KC_MUTE, KC_VOLD, KC_VOLU, KC_TILD, _______,          _______, KC_PIPE, KC_COLN, KC_LCBR, KC_RCBR, KC_RSPC, XXXXXXX,
     //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                                       _______, _______, _______,                   _______, _______, _______
                                   // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
