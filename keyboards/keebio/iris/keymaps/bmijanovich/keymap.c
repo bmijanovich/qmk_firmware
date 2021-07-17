@@ -1,9 +1,5 @@
 #include QMK_KEYBOARD_H
 
-//Encoder Cmd-Tab support
-bool is_cmd_tab_active = false;
-uint16_t cmd_tab_timer = 0;
-
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [0] = LAYOUT(
@@ -14,7 +10,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
        LCTL_T(KC_ESC), KC_A, KC_S, KC_D,   KC_F,    KC_G,                               KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
     //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-       KC_LSPO, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    LT(1, KC_SPC),    RGB_TOG, KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSPC,
+       KC_LSPO, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    LT(1, KC_SPC), RSFT_T(KC_BSPC), KC_N, KC_M,  KC_COMM, KC_DOT,  KC_SLSH, KC_RSPC,
     //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                           LOPT_T(KC_ESC), LGUI_T(KC_TAB), LT(1, KC_SPC),      RSFT_T(KC_BSPC), RGUI_T(KC_ENT), RCTL_T(KC_DEL)
                                   // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
@@ -28,7 +24,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
        LCTL_T(KC_CAPS), XXXXXXX, KC_MUTE, KC_VOLD, KC_VOLU, KC_EQL,                     KC_MINS, KC_LEFT, KC_DOWN, KC_RGHT, KC_PGDN, KC_F12,
     //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-       _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______,          _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______,
+       _______, RGB_TOG, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______,          _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______,
     //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                                       _______, _______, _______,                   _______, _______, _______
                                   // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
@@ -42,46 +38,6 @@ bool get_tapping_force_hold(uint16_t keycode, keyrecord_t *record) {
         default:
             return false;
     }
-}
-
-bool encoder_update_user(uint8_t index, bool clockwise) {
-    if (index == 1) { /* Right encoder */ 
-        if ((get_mods() & MOD_BIT(KC_LCTL)) == MOD_BIT(KC_LCTL)) { /* Switch browser tabs */
-            if (clockwise) {
-                tap_code(KC_TAB);
-            } else {
-                tap_code16(LSFT(KC_TAB));
-            }
-        } else if (IS_LAYER_ON(1)) { /* Switch Mac application windows */
-            if (clockwise) {
-                tap_code16(LGUI(KC_GRV));
-            } else {
-                tap_code16(LSFT(LGUI(KC_GRV)));
-            }
-        } else { /* Switch Mac applications */
-            if (!is_cmd_tab_active) {
-                is_cmd_tab_active = true;
-                register_code(KC_LGUI);
-            }
-            if (clockwise) {
-                cmd_tab_timer = timer_read();
-                tap_code16(KC_TAB);
-            } else {
-                cmd_tab_timer = timer_read();
-                tap_code16(LSFT(KC_TAB));
-            }
-        }
-    }
-    return true;
-}
-
-void matrix_scan_user(void) {
-  if (is_cmd_tab_active) { /* Release Cmd for Cmd-Tab after 750ms */
-    if (timer_elapsed(cmd_tab_timer) > 750) {
-      unregister_code(KC_LGUI);
-      is_cmd_tab_active = false;
-    }
-  }
 }
 
 #ifdef RGBLIGHT_ENABLE
