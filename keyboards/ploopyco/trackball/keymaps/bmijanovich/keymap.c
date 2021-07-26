@@ -23,7 +23,6 @@ typedef enum {
     TD_UNKNOWN,
     TD_SINGLE_TAP,
     TD_DOUBLE_TAP,
-    TD_TRIPLE_TAP,
     TD_SINGLE_HOLD,
 } td_action_t;
 
@@ -31,7 +30,6 @@ typedef enum {
 td_action_t get_tap_dance_action(qk_tap_dance_state_t *state) {
     if (state->count == 1) return (state->pressed) ? TD_SINGLE_HOLD : TD_SINGLE_TAP;
     else if (state->count == 2) return TD_DOUBLE_TAP;
-    else if (state->count == 3) return TD_TRIPLE_TAP;
     else return TD_UNKNOWN;
 }
 /* End shared Tap Dance configuration */
@@ -50,6 +48,8 @@ static td_action_t btn2_td_action = TD_NONE;
 void btn2_td_tap(qk_tap_dance_state_t *state, void *user_data) {
     if (state->count == 3) {
         tap_code(KC_BSPC);
+        state->pressed = false;
+        state->finished = true;
         reset_tap_dance(state);
     }
 }
@@ -96,6 +96,8 @@ static td_action_t btn4_td_action = TD_NONE;
 void btn4_td_tap(qk_tap_dance_state_t *state, void *user_data) {
     if (state->count == 2) {
         tap_code16(KC_LS);
+        state->pressed = false;
+        state->finished = true;
         reset_tap_dance(state);
     }
 }
@@ -140,6 +142,8 @@ static td_action_t btn5_td_action = TD_NONE;
 void btn5_td_tap(qk_tap_dance_state_t *state, void *user_data) {
     if (state->count == 2) {
         tap_code16(KC_RS);
+        state->pressed = false;
+        state->finished = true;
         reset_tap_dance(state);
     }
 }
@@ -203,5 +207,7 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 
 /* TODO:
   * Scroll wheel horizontal scroll when drag scroll enabled
+  * Work in DPI_CONFIG?
+  * TAPPING_TERM adjustments
   * Remove RESET when keymap finalized
 */
