@@ -47,6 +47,13 @@ Mouse button 2 Tap Dance configuration
 */
 static td_action_t btn2_td_action = TD_NONE;
 
+void btn2_td_tap(qk_tap_dance_state_t *state, void *user_data) {
+    if (state->count == 3) {
+        tap_code(KC_BSPC);
+        reset_tap_dance(state);
+    }
+}
+
 void btn2_td_finished(qk_tap_dance_state_t *state, void *user_data) {
     btn2_td_action = get_tap_dance_action(state);
     switch (btn2_td_action) {
@@ -55,9 +62,6 @@ void btn2_td_finished(qk_tap_dance_state_t *state, void *user_data) {
             break;
         case TD_DOUBLE_TAP:
             tap_code(KC_ENT);
-            break;
-        case TD_TRIPLE_TAP:
-            tap_code(KC_BSPC);
             break;
         default:
             break;
@@ -73,7 +77,6 @@ void btn2_td_finished(qk_tap_dance_state_t *state, void *user_data) {
 Mouse button 4 Tap Dance configuration
   * Single tap: Back (BTN4)
   * Double tap: Move leftward one space (KC_LS)
-  * Triple tap: Cycle trackball DPI (DPI_CONFIG)
   * Single hold: Enable trackball scrolling (DRAG_SCROLL)
 */
 static keyrecord_t btn4_record = {
@@ -90,23 +93,18 @@ static keyrecord_t btn4_record = {
 
 static td_action_t btn4_td_action = TD_NONE;
 
+void btn4_td_tap(qk_tap_dance_state_t *state, void *user_data) {
+    if (state->count == 2) {
+        tap_code16(KC_LS);
+        reset_tap_dance(state);
+    }
+}
+
 void btn4_td_finished(qk_tap_dance_state_t *state, void *user_data) {
     btn4_td_action = get_tap_dance_action(state);
     switch (btn4_td_action) {
         case TD_SINGLE_TAP:
             tap_code16(KC_BTN4);
-            break;
-        case TD_DOUBLE_TAP:
-            tap_code16(KC_LS);
-            break;
-        case TD_TRIPLE_TAP:
-            btn4_record.event.pressed = true;
-            btn4_record.event.time = timer_read();
-            process_record_kb(DPI_CONFIG, &btn4_record);
-            wait_ms(10);
-            btn4_record.event.pressed = false;
-            btn4_record.event.time = timer_read();
-            process_record_kb(DPI_CONFIG, &btn4_record);
             break;
         case TD_SINGLE_HOLD:
             btn4_record.event.pressed = true;
@@ -139,14 +137,18 @@ Mouse button 5 Tap Dance configuration
 */
 static td_action_t btn5_td_action = TD_NONE;
 
+void btn5_td_tap(qk_tap_dance_state_t *state, void *user_data) {
+    if (state->count == 2) {
+        tap_code16(KC_RS);
+        reset_tap_dance(state);
+    }
+}
+
 void btn5_td_finished(qk_tap_dance_state_t *state, void *user_data) {
     btn5_td_action = get_tap_dance_action(state);
     switch (btn5_td_action) {
         case TD_SINGLE_TAP:
             tap_code16(KC_BTN5);
-            break;
-        case TD_DOUBLE_TAP:
-            tap_code16(KC_RS);
             break;
         case TD_SINGLE_HOLD:
             layer_on(1);
@@ -169,9 +171,9 @@ void btn5_td_reset(qk_tap_dance_state_t *state, void *user_data) {
 
 // Associate tap dance keys with their functionality
 qk_tap_dance_action_t tap_dance_actions[] = {
-    [TD_BTN2] = ACTION_TAP_DANCE_FN(btn2_td_finished),
-    [TD_BTN4] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, btn4_td_finished, btn4_td_reset),
-    [TD_BTN5] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, btn5_td_finished, btn5_td_reset),
+    [TD_BTN2] = ACTION_TAP_DANCE_FN_ADVANCED(btn2_td_tap, btn2_td_finished, NULL),
+    [TD_BTN4] = ACTION_TAP_DANCE_FN_ADVANCED(btn4_td_tap, btn4_td_finished, btn4_td_reset),
+    [TD_BTN5] = ACTION_TAP_DANCE_FN_ADVANCED(btn5_td_tap, btn5_td_finished, btn5_td_reset),
 };
 
 // Keymap
