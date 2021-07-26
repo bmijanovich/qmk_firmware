@@ -1,5 +1,10 @@
 #include QMK_KEYBOARD_H
 
+//Custom keycode for enabling rolling off layer and DPI_CONFIG button
+enum {
+    DPI_TOG = PLOOPY_SAFE_RANGE
+};
+
 // Utility function keycodes
 #define KC_LS LCTL(KC_LEFT) // Move leftward one space
 #define KC_RS LCTL(KC_RGHT) // Move rightward one space
@@ -42,6 +47,7 @@ Mouse button 2 Tap Dance configuration
   * Single tap: Right click (BTN2)
   * Double tap: Enter (KC_ENT)
   * Triple tap: Backspace (KC_BSPC)
+  * Single hold: Switch to layer 1
 */
 static td_action_t btn2_td_action = TD_NONE;
 
@@ -63,10 +69,19 @@ void btn2_td_finished(qk_tap_dance_state_t *state, void *user_data) {
         case TD_DOUBLE_TAP:
             tap_code(KC_ENT);
             break;
+        case TD_SINGLE_HOLD:
+            layer_on(1);
+            break;
         default:
             break;
-    reset_tap_dance(state);
     }
+}
+
+void btn2_td_reset(qk_tap_dance_state_t *state, void *user_data) {
+    if (btn2_td_action == TD_SINGLE_HOLD) {
+        layer_off(1);
+    }
+    btn2_td_action = TD_NONE;
 }
 /* End mouse button 2 Tap Dance configuration */
 
@@ -135,7 +150,7 @@ void btn4_td_reset(qk_tap_dance_state_t *state, void *user_data) {
 Mouse button 5 Tap Dance configuration
   * Single tap: Forward (BTN5)
   * Double tap: Move rightward one space (KC_RS)
-  * Single hold: Switch to layer 1
+  * Single hold: Switch to layer 2
 */
 static td_action_t btn5_td_action = TD_NONE;
 
@@ -155,7 +170,7 @@ void btn5_td_finished(qk_tap_dance_state_t *state, void *user_data) {
             tap_code16(KC_BTN5);
             break;
         case TD_SINGLE_HOLD:
-            layer_on(1);
+            layer_on(2);
             break;
         default:
             break;
@@ -164,7 +179,7 @@ void btn5_td_finished(qk_tap_dance_state_t *state, void *user_data) {
 
 void btn5_td_reset(qk_tap_dance_state_t *state, void *user_data) {
     if (btn5_td_action == TD_SINGLE_HOLD) {
-        layer_off(1);
+        layer_off(2);
     }
     btn5_td_action = TD_NONE;
 }
@@ -175,7 +190,7 @@ void btn5_td_reset(qk_tap_dance_state_t *state, void *user_data) {
 
 // Associate tap dance keys with their functionality
 qk_tap_dance_action_t tap_dance_actions[] = {
-    [TD_BTN2] = ACTION_TAP_DANCE_FN_ADVANCED(btn2_td_tap, btn2_td_finished, NULL),
+    [TD_BTN2] = ACTION_TAP_DANCE_FN_ADVANCED(btn2_td_tap, btn2_td_finished, btn2_td_reset),
     [TD_BTN4] = ACTION_TAP_DANCE_FN_ADVANCED(btn4_td_tap, btn4_td_finished, btn4_td_reset),
     [TD_BTN5] = ACTION_TAP_DANCE_FN_ADVANCED(btn5_td_tap, btn5_td_finished, btn5_td_reset),
 };
@@ -186,11 +201,46 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_BTN1, KC_MS, TD(TD_BTN2),
           TD(TD_BTN4), TD(TD_BTN5)
     ),
-    [1] = LAYOUT( // Utility functions
+    [1] = LAYOUT( // Cycle trackball DPI
+        _______, DPI_TOG, _______,
+          _______, _______
+    ),
+    [2] = LAYOUT( // Utility functions
         KC_BTN3, KC_SS, _______,
           RESET, _______
     )
 };
+
+// Enable rolling off layer and DPI_CONFIG button
+static keyrecord_t btn3_record = {
+    .event = {
+        .key = {
+            .col = 1,
+            .row = 0
+            },
+        .pressed = false,
+        .time = 0
+    },
+    .tap = {0}
+};
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case DPI_TOG:
+            if (!record->event.pressed) {
+                btn3_record.event.pressed = true;
+                btn3_record.event.time = timer_read();
+                process_record_kb(DPI_CONFIG, &btn3_record);
+                wait_ms(10);
+                btn3_record.event.pressed = false;
+                btn3_record.event.time = timer_read();
+                process_record_kb(DPI_CONFIG, &btn3_record);
+            }
+            return false;
+        default:
+            return true;
+    }
+}
 
 // Need a longer TAPPING_TERM for slower ring and pinky fingers
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
@@ -207,7 +257,6 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 
 /* TODO:
   * Scroll wheel horizontal scroll when drag scroll enabled
-  * Work in DPI_CONFIG?
   * TAPPING_TERM adjustments
   * Remove RESET when keymap finalized
 */
