@@ -94,6 +94,8 @@ Mouse button 4 Tap Dance configuration
   * Double tap: Move leftward one space (KC_LS)
   * Single hold: Enable trackball scrolling (DRAG_SCROLL)
 */
+static bool is_drag_scroll = false;
+
 static keyrecord_t btn4_record = {
     .event = {
         .key = {
@@ -127,6 +129,7 @@ void btn4_td_finished(qk_tap_dance_state_t *state, void *user_data) {
             btn4_record.event.pressed = true;
             btn4_record.event.time = timer_read();
             process_record_kb(DRAG_SCROLL, &btn4_record);
+            is_drag_scroll = true;
             break;
         default:
             break;
@@ -138,6 +141,7 @@ void btn4_td_reset(qk_tap_dance_state_t *state, void *user_data) {
         btn4_record.event.pressed = false;
         btn4_record.event.time = timer_read();
         process_record_kb(DRAG_SCROLL, &btn4_record);
+        is_drag_scroll = false;
     }
     btn4_td_action = TD_NONE;
 }
@@ -211,6 +215,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     )
 };
 
+// Horizontal scrolling with wheel while DRAG_SCROLL enabled
+void process_wheel_user(report_mouse_t* mouse_report, int16_t h, int16_t v) {
+    if (is_drag_scroll) {
+        mouse_report->h = -v;
+        pointing_device_set_report(*mouse_report);
+        pointing_device_send();
+    }
+    else {
+        mouse_report->h = h;
+        mouse_report->v = v;
+    }
+}
+
 // Enable rolling off layer and DPI_CONFIG button
 static keyrecord_t btn3_record = {
     .event = {
@@ -256,7 +273,6 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 
 
 /* TODO:
-  * Scroll wheel horizontal scroll when drag scroll enabled
   * TAPPING_TERM adjustments
   * Remove RESET when keymap finalized
 */
