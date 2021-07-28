@@ -9,7 +9,6 @@ enum {
 #define KC_LS LCTL(KC_LEFT) // Move leftward one space
 #define KC_RS LCTL(KC_RGHT) // Move rightward one space
 #define KC_MS KC_F3 // Activate Mission Control
-#define KC_DT KC_F5 // Show desktop
 #define KC_SS LSFT(LCMD(KC_4)) // Take a screenshot
 
 // Track drag scrolling state
@@ -156,7 +155,7 @@ void btn2_td_reset(qk_tap_dance_state_t *state, void *user_data) {
 Mouse button 4 Tap Dance configuration
   * Single tap: Back (BTN4)
   * Double tap: Move leftward one space (KC_LS)
-  * Single hold: Switch to layer 2 and enable trackball scrolling (DRAG_SCROLL)
+  * Single hold: Enable trackball scrolling (DRAG_SCROLL)
 */
 static td_action_t btn4_td_action = TD_NONE;
 
@@ -175,7 +174,6 @@ void btn4_td_finished(qk_tap_dance_state_t *state, void *user_data) {
             tap_code16(KC_BTN4);
             break;
         case TD_SINGLE_HOLD:
-            layer_on(2);
             register_custom_keycode(DRAG_SCROLL, 3, 0);
             drag_scroll_active = true;
             break;
@@ -186,7 +184,6 @@ void btn4_td_finished(qk_tap_dance_state_t *state, void *user_data) {
 
 void btn4_td_reset(qk_tap_dance_state_t *state, void *user_data) {
     if (btn4_td_action == TD_SINGLE_HOLD) {
-        layer_off(2);
         unregister_custom_keycode(DRAG_SCROLL, 3, 0);
         drag_scroll_active = false;
     }
@@ -201,7 +198,7 @@ void btn4_td_reset(qk_tap_dance_state_t *state, void *user_data) {
 Mouse button 5 Tap Dance configuration
   * Single tap: Forward (BTN5)
   * Double tap: Move rightward one space (KC_RS)
-  * Single hold: Switch to layer 3
+  * Single hold: Switch to layer 2
 */
 static td_action_t btn5_td_action = TD_NONE;
 
@@ -220,7 +217,7 @@ void btn5_td_finished(qk_tap_dance_state_t *state, void *user_data) {
             tap_code16(KC_BTN5);
             break;
         case TD_SINGLE_HOLD:
-            layer_on(3);
+            layer_on(2);
             break;
         default:
             break;
@@ -229,7 +226,7 @@ void btn5_td_finished(qk_tap_dance_state_t *state, void *user_data) {
 
 void btn5_td_reset(qk_tap_dance_state_t *state, void *user_data) {
     if (btn5_td_action == TD_SINGLE_HOLD) {
-        layer_off(3);
+        layer_off(2);
     }
     btn5_td_action = TD_NONE;
 }
@@ -255,11 +252,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, DPI_TOG, _______,
           _______, _______
     ),
-    [2] = LAYOUT( // Show desktop
-        _______, KC_DT, _______,
-          _______, _______
-    ),
-    [3] = LAYOUT( // Utility functions
+    [2] = LAYOUT( // Utility functions
         KC_BTN3, KC_SS, _______,
           RESET, _______
     )
@@ -305,6 +298,6 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 
 
 /* TODO:
-  * TAPPING_TERM adjustments
+  * Better option than KC_BSPC for triple tap on button 2?
   * Remove RESET when keymap finalized
 */
