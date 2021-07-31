@@ -336,7 +336,7 @@ void process_wheel_user(report_mouse_t* mouse_report, int16_t h, int16_t v) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case KC_BTN1:  // Update drag lock state
-            if (record->event.pressed) {
+            if (record->event.pressed && layer_state == _BASE) {  // Sometimes this happens on other layers when quickly rolling through Tap Dance
                 drag_lock_active = true;
             }
             else {
