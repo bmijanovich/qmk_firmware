@@ -6,10 +6,10 @@ enum {
 };
 
 // Mac utility function keycodes
-#define KC_LS LCTL(KC_LEFT) // Move leftward one space
-#define KC_RS LCTL(KC_RGHT) // Move rightward one space
-#define KC_MS KC_F3 // Activate Mission Control
-#define KC_SS LSFT(LCMD(KC_4)) // Take a screenshot
+#define KC_LS LCTL(KC_LEFT)  // Move leftward one space
+#define KC_RS LCTL(KC_RGHT)  // Move rightward one space
+#define KC_MS KC_F3  // Activate Mission Control
+#define KC_SS LSFT(LCMD(KC_4))  // Take a screenshot
 
 // Track drag scrolling state
 static bool drag_scroll_active = false;
@@ -299,5 +299,7 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 
 /* TODO:
   * Better option than KC_BSPC for triple tap on button 2?
+  * Drag lock option
+  * OS switching
   * Remove RESET when keymap finalized
 */
