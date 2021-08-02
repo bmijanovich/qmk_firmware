@@ -162,7 +162,7 @@ void hard_reset_tap_dance(qk_tap_dance_state_t *state) {
 Mouse button 2 Tap Dance configuration
   * Single tap: Right click (BTN2)
   * Double tap: Enter (KC_ENT)
-  * Triple tap: Backspace (KC_BSPC)
+  * Triple tap: Open a new Chrome window
   * Single hold: Switch to _DPI_CONTROL layer
 */
 static td_action_t btn2_td_action = TD_NONE;
@@ -170,7 +170,7 @@ static td_action_t btn2_td_action = TD_NONE;
 void btn2_td_tap(qk_tap_dance_state_t *state, void *user_data) {
     btn2_td_action = get_tap_dance_action(state);
     if (btn2_td_action == TD_TRIPLE_TAP) {
-        tap_code(KC_BSPC);
+        SEND_STRING(SS_LCMD(" ") SS_DELAY(250) "chrome" SS_DELAY(250) SS_TAP(X_ENT) SS_DELAY(250) SS_LCMD("n"));
         hard_reset_tap_dance(state);
     }
 }
@@ -382,7 +382,7 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 
 
 /* TODO:
-  * Better option than KC_BSPC for triple tap on button 2?
+  * Figure out conflicting Tap Dance keys, and assign copy/cut/paste
   * OS switching
   * Remove RESET when keymap finalized
 */
