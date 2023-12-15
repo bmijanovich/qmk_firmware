@@ -19,8 +19,8 @@ enum {
 // Mac utility function keycodes
 #define KC_LS LCTL(KC_LEFT)  // Move leftward one space
 #define KC_RS LCTL(KC_RGHT)  // Move rightward one space
-#define KC_MS KC_F3  // Activate Mission Control
-#define KC_DT KC_F5  // Show desktop
+#define KC_MS LCTL(KC_UP)  // Activate Mission Control
+#define KC_DT KC_F11  // Show desktop
 #define KC_SS LSFT(LCMD(KC_4))  // Take a screenshot
 
 // Track drag scrolling state
