@@ -75,8 +75,8 @@ static td_action_t btn2_td_action = TD_NONE;
 static td_action_t btn4_td_action = TD_NONE;
 static td_action_t btn5_td_action = TD_NONE;
 
-// Dummy keyrecord_t for hooking process_record_kb() with custom keycodes
-static keyrecord_t dummy_record;
+// Fake keyrecord_t for hooking process_record_kb() with custom keycodes
+static keyrecord_t fake_record;
 
 // QMK userspace callback functions
 bool process_record_user(uint16_t keycode, keyrecord_t *record);
@@ -103,7 +103,7 @@ tap_dance_action_t tap_dance_actions[] = {
 };
 
 // Functions for sending custom keycodes, since QMK functions can't register them
-static void setup_dummy_record(uint8_t col, uint8_t row, bool pressed);
+static void setup_fake_record(uint8_t col, uint8_t row, bool pressed);
 static void register_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row);
 static void unregister_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row);
 
@@ -294,22 +294,22 @@ static void btn5_td_reset(tap_dance_state_t *state, void *user_data) {
 
 /* Functions for sending custom keycodes */
 
-// Setup dummy_record for process_record_kb()
-static void setup_dummy_record(uint8_t col, uint8_t row, bool pressed) {
-    dummy_record.event.key.col = col;
-    dummy_record.event.key.row = row;
-    dummy_record.event.pressed = pressed;
-    dummy_record.event.time = timer_read();
+// Setup fake_record for process_record_kb()
+static void setup_fake_record(uint8_t col, uint8_t row, bool pressed) {
+    fake_record.event.key.col = col;
+    fake_record.event.key.row = row;
+    fake_record.event.pressed = pressed;
+    fake_record.event.time = timer_read();
 }
 
 // Register a custom keycode with process_record_kb()
 static void register_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row) {
-    setup_dummy_record(col, row, true);
-    process_record_kb(keycode, &dummy_record);
+    setup_fake_record(col, row, true);
+    process_record_kb(keycode, &fake_record);
 }
 
 // Unregister a custom keycode with process_record_kb()
 static void unregister_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row) {
-    setup_dummy_record(col, row, false);
-    process_record_kb(keycode, &dummy_record);
+    setup_fake_record(col, row, false);
+    process_record_kb(keycode, &fake_record);
 }
