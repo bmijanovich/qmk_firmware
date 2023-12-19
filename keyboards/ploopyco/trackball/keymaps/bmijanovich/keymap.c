@@ -5,24 +5,24 @@
 #include QMK_KEYBOARD_H
 
 // Mac utility function keycodes
-#define MAC_DL LCTL(KC_LEFT)        // Move leftward one space
-#define MAC_DR LCTL(KC_RGHT)        // Move rightward one space
-#define MAC_SW LCTL(KC_UP)          // Activate Mission Control
-#define MAC_SD KC_F11               // Show the desktop
-#define MAC_SS LSFT(LGUI(KC_4))     // Take a screenshot (selection)
-#define MAC_COPY LGUI(KC_C)         // Copy
-#define MAC_CUT LGUI(KC_X)          // Cut
-#define MAC_PASTE LGUI(KC_V)        // Paste
+#define MAC_DL     LCTL(KC_LEFT)        // Move leftward one space
+#define MAC_DR     LCTL(KC_RGHT)        // Move rightward one space
+#define MAC_SW     LCTL(KC_UP)          // Activate Mission Control
+#define MAC_SD     KC_F11               // Show the desktop
+#define MAC_SS     LSFT(LGUI(KC_4))     // Take a screenshot (selection)
+#define MAC_COPY   LGUI(KC_C)           // Copy
+#define MAC_CUT    LGUI(KC_X)           // Cut
+#define MAC_PASTE  LGUI(KC_V)           // Paste
 
 // Windows utility function keycodes
-#define WIN_DL LGUI(LCTL(KC_LEFT))  // Move leftward one desktop
-#define WIN_DR LGUI(LCTL(KC_RGHT))  // Move rightward one desktop
-#define WIN_SW LGUI(KC_TAB)         // Activate Task View
-#define WIN_SD LGUI(KC_D)           // Show the desktop
-#define WIN_SS LSFT(LGUI(KC_S))     // Take a screenshot (Snipping Tool)
-#define WIN_COPY LCTL(KC_C)         // Copy
-#define WIN_CUT LCTL(KC_X)          // Cut
-#define WIN_PASTE LCTL(KC_V)        // Paste
+#define WIN_DL     LGUI(LCTL(KC_LEFT))  // Move leftward one desktop
+#define WIN_DR     LGUI(LCTL(KC_RGHT))  // Move rightward one desktop
+#define WIN_SW     LGUI(KC_TAB)         // Activate Task View
+#define WIN_SD     LGUI(KC_D)           // Show the desktop
+#define WIN_SS     LSFT(LGUI(KC_S))     // Take a screenshot (Snipping Tool)
+#define WIN_COPY   LCTL(KC_C)           // Copy
+#define WIN_CUT    LCTL(KC_X)           // Cut
+#define WIN_PASTE  LCTL(KC_V)           // Paste
 
 // Layers
 enum {
@@ -56,29 +56,40 @@ enum {
 
 // Keymap
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [_BASE] = LAYOUT(  // Base layer
+    // Base layer
+    [_BASE] = LAYOUT(
         KC_BTN1, SHOW_WINDOWS, TD(TD_BTN2),
-          TD(TD_BTN4), TD(TD_BTN5)
+        TD(TD_BTN4), TD(TD_BTN5)
     ),
-    [_DRAG_LOCK] = LAYOUT(  // Special layer for drag lock state
+
+    // Special layer for drag lock state
+    [_DRAG_LOCK] = LAYOUT(
         DRAG_LOCK_OFF, _______, _______,
-          _______, _______
+        _______, _______
     ),
-    [_DPI_CONTROL] = LAYOUT(  // Cycle trackball DPI
+
+    // Cycle trackball DPI
+    [_DPI_CONTROL] = LAYOUT(
         XXXXXXX, DPI_CONFIG, _______,
-          XXXXXXX, XXXXXXX
+        XXXXXXX, XXXXXXX
     ),
-    [_BTN4_FUNCTIONS] = LAYOUT(  // Drag scroll, horizontal scroll with wheel, drag lock and utility functions
+
+    // Drag scroll, horizontal scroll with wheel, drag lock and utility functions
+    [_BTN4_FUNCTIONS] = LAYOUT(
         DRAG_LOCK_ON, SHOW_DESKTOP, CUT,
-          _______, MO(_SYSTEM)
+        _______, MO(_SYSTEM)
     ),
-    [_BTN5_FUNCTIONS] = LAYOUT(  // Utility functions
+
+    // Utility functions
+    [_BTN5_FUNCTIONS] = LAYOUT(
         KC_BTN3, SCREENSHOT, COPY,
-          PASTE, _______
+        PASTE, _______
     ),
-    [_SYSTEM] = LAYOUT(  // Toggle between Mac and Windows modes, reset and bootloader
+
+    // Toggle between Mac and Windows modes, reset and bootloader
+    [_SYSTEM] = LAYOUT(
         QK_RBT, QK_BOOT, TOGGLE_MAC_WINDOWS,
-          _______, _______
+        _______, _______
     ),
 };
 
