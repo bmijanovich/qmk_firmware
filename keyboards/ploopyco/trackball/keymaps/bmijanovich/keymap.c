@@ -4,25 +4,26 @@
 
 #include QMK_KEYBOARD_H
 
+// CKC = Custom key code
 // Mac utility function keycodes
-#define MAC_DL     LCTL(KC_LEFT)        // Move leftward one space
-#define MAC_DR     LCTL(KC_RGHT)        // Move rightward one space
-#define MAC_SW     LCTL(KC_UP)          // Activate Mission Control
-#define MAC_SD     KC_F11               // Show the desktop
-#define MAC_SS     LSFT(LGUI(KC_4))     // Take a screenshot (selection)
-#define MAC_COPY   LGUI(KC_C)           // Copy
-#define MAC_CUT    LGUI(KC_X)           // Cut
-#define MAC_PASTE  LGUI(KC_V)           // Paste
+#define CKC_MAC_DL     LCTL(KC_LEFT)        // Move leftward one space
+#define CKC_MAC_DR     LCTL(KC_RGHT)        // Move rightward one space
+#define CKC_MAC_SW     LCTL(KC_UP)          // Activate Mission Control
+#define CKC_MAC_SD     KC_F11               // Show the desktop
+#define CKC_MAC_SS     LSFT(LGUI(KC_4))     // Take a screenshot (selection)
+#define CKC_MAC_CUT    LGUI(KC_X)           // Cut
+#define CKC_MAC_COPY   LGUI(KC_C)           // Copy
+#define CKC_MAC_PASTE  LGUI(KC_V)           // Paste
 
 // Windows utility function keycodes
-#define WIN_DL     LGUI(LCTL(KC_LEFT))  // Move leftward one desktop
-#define WIN_DR     LGUI(LCTL(KC_RGHT))  // Move rightward one desktop
-#define WIN_SW     LGUI(KC_TAB)         // Activate Task View
-#define WIN_SD     LGUI(KC_D)           // Show the desktop
-#define WIN_SS     LSFT(LGUI(KC_S))     // Take a screenshot (Snipping Tool)
-#define WIN_COPY   LCTL(KC_C)           // Copy
-#define WIN_CUT    LCTL(KC_X)           // Cut
-#define WIN_PASTE  LCTL(KC_V)           // Paste
+#define CKC_WIN_DL     LGUI(LCTL(KC_LEFT))  // Move leftward one desktop
+#define CKC_WIN_DR     LGUI(LCTL(KC_RGHT))  // Move rightward one desktop
+#define CKC_WIN_SW     LGUI(KC_TAB)         // Activate Task View
+#define CKC_WIN_SD     LGUI(KC_D)           // Show the desktop
+#define CKC_WIN_SS     LSFT(LGUI(KC_S))     // Take a screenshot (Snipping Tool)
+#define CKC_WIN_CUT    LCTL(KC_X)           // Cut
+#define CKC_WIN_COPY   LCTL(KC_C)           // Copy
+#define CKC_WIN_PASTE  LCTL(KC_V)           // Paste
 
 // Layers
 enum {
@@ -36,15 +37,15 @@ enum {
 
 // Custom keycodes
 enum {
-    DRAG_LOCK_ON = SAFE_RANGE,
-    DRAG_LOCK_OFF,
-    TOGGLE_MAC_WINDOWS,
-    SHOW_WINDOWS,
-    SHOW_DESKTOP,
-    SCREENSHOT,
-    CUT,
-    COPY,
-    PASTE,
+    CKC_DRAG_LOCK_ON = SAFE_RANGE,
+    CKC_DRAG_LOCK_OFF,
+    CKC_TOGGLE_MAC_WINDOWS,
+    CKC_SHOW_WINDOWS,
+    CKC_SHOW_DESKTOP,
+    CKC_SCREENSHOT,
+    CKC_CUT,
+    CKC_COPY,
+    CKC_PASTE,
 };
 
 // Tap Dance keycodes
@@ -58,37 +59,32 @@ enum {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     // Base layer
     [_BASE] = LAYOUT(
-        KC_BTN1, SHOW_WINDOWS, TD(TD_BTN2),
+        KC_BTN1, CKC_SHOW_WINDOWS, TD(TD_BTN2),
         TD(TD_BTN4), TD(TD_BTN5)
     ),
-
     // Special layer for drag lock state
     [_DRAG_LOCK] = LAYOUT(
-        DRAG_LOCK_OFF, _______, _______,
+        CKC_DRAG_LOCK_OFF, _______, _______,
         _______, _______
     ),
-
     // Cycle trackball DPI
     [_DPI_CONTROL] = LAYOUT(
         XXXXXXX, DPI_CONFIG, _______,
         XXXXXXX, XXXXXXX
     ),
-
     // Drag scroll, horizontal scroll with wheel, drag lock and utility functions
     [_BTN4_FUNCTIONS] = LAYOUT(
-        DRAG_LOCK_ON, SHOW_DESKTOP, CUT,
+        CKC_DRAG_LOCK_ON, CKC_SHOW_DESKTOP, CKC_CUT,
         _______, MO(_SYSTEM)
     ),
-
     // Utility functions
     [_BTN5_FUNCTIONS] = LAYOUT(
-        KC_BTN3, SCREENSHOT, COPY,
-        PASTE, _______
+        KC_BTN3, CKC_SCREENSHOT, CKC_COPY,
+        CKC_PASTE, _______
     ),
-
     // Toggle between Mac and Windows modes, reset and bootloader
     [_SYSTEM] = LAYOUT(
-        QK_RBT, QK_BOOT, TOGGLE_MAC_WINDOWS,
+        QK_RBT, QK_BOOT, CKC_TOGGLE_MAC_WINDOWS,
         _______, _______
     ),
 };
@@ -150,63 +146,63 @@ static void unregister_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row
 // Handle custom keycodes
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        case DRAG_LOCK_ON:  // Enable drag lock
+        case CKC_DRAG_LOCK_ON:  // Enable drag lock
             if (record->event.pressed) {
                 register_code16(KC_BTN1);
                 layer_on(_DRAG_LOCK);
             }
             return false;
-        case DRAG_LOCK_OFF:  // Disable drag lock
+        case CKC_DRAG_LOCK_OFF:  // Disable drag lock
             if (!record->event.pressed) {
                 layer_off(_DRAG_LOCK);
                 unregister_code16(KC_BTN1);
             }
             return false;
-        case TOGGLE_MAC_WINDOWS:  // Toggle between Mac and Windows modes
+        case CKC_TOGGLE_MAC_WINDOWS:  // Toggle between Mac and Windows modes
             if (record->event.pressed) {
                 mac ^= 1;
             }
             return false;
-        case SHOW_WINDOWS:  // Show all windows
+        case CKC_SHOW_WINDOWS:  // Show all windows
             if (record->event.pressed) {
-                register_code16(mac ? MAC_SW : WIN_SW);
+                register_code16(mac ? CKC_MAC_SW : CKC_WIN_SW);
             } else {
-                unregister_code16(mac ? MAC_SW : WIN_SW);
+                unregister_code16(mac ? CKC_MAC_SW : CKC_WIN_SW);
             }
             return false;
-        case SHOW_DESKTOP:  // Show the desktop
+        case CKC_SHOW_DESKTOP:  // Show the desktop
             if (record->event.pressed) {
-                register_code16(mac ? MAC_SD : WIN_SD);
+                register_code16(mac ? CKC_MAC_SD : CKC_WIN_SD);
             } else {
-                unregister_code16(mac ? MAC_SD : WIN_SD);
+                unregister_code16(mac ? CKC_MAC_SD : CKC_WIN_SD);
             }
             return false;
-        case SCREENSHOT:  // Take a screenshot
+        case CKC_SCREENSHOT:  // Take a screenshot
             if (record->event.pressed) {
-                register_code16(mac ? MAC_SS : WIN_SS);
+                register_code16(mac ? CKC_MAC_SS : CKC_WIN_SS);
             } else {
-                unregister_code16(mac ? MAC_SS : WIN_SS);
+                unregister_code16(mac ? CKC_MAC_SS : CKC_WIN_SS);
             }
             return false;
-        case CUT:
+        case CKC_CUT:
             if (record->event.pressed) {
-                register_code16(mac ? MAC_CUT : WIN_CUT);
+                register_code16(mac ? CKC_MAC_CUT : CKC_WIN_CUT);
             } else {
-                unregister_code16(mac ? MAC_CUT : WIN_CUT);
+                unregister_code16(mac ? CKC_MAC_CUT : CKC_WIN_CUT);
             }
             return false;
-        case COPY:
+        case CKC_COPY:
             if (record->event.pressed) {
-                register_code16(mac ? MAC_COPY : WIN_COPY);
+                register_code16(mac ? CKC_MAC_COPY : CKC_WIN_COPY);
             } else {
-                unregister_code16(mac ? MAC_COPY : WIN_COPY);
+                unregister_code16(mac ? CKC_MAC_COPY : CKC_WIN_COPY);
             }
             return false;
-        case PASTE:
+        case CKC_PASTE:
             if (record->event.pressed) {
-                register_code16(mac ? MAC_PASTE : WIN_PASTE);
+                register_code16(mac ? CKC_MAC_PASTE : CKC_WIN_PASTE);
             } else {
-                unregister_code16(mac ? MAC_PASTE : WIN_PASTE);
+                unregister_code16(mac ? CKC_MAC_PASTE : CKC_WIN_PASTE);
             }
             return false;
         default:
@@ -294,7 +290,7 @@ static void btn2_td_reset(tap_dance_state_t *state, void *user_data) {
 static void btn4_td_tap(tap_dance_state_t *state, void *user_data) {
     btn4_td_action = get_tap_dance_action(state);
     if (btn4_td_action == TD_DOUBLE_TAP) {
-        register_code16(mac ? MAC_DL : WIN_DL);
+        register_code16(mac ? CKC_MAC_DL : CKC_WIN_DL);
         state->finished = true;
     }
 }
@@ -319,7 +315,7 @@ static void btn4_td_finished(tap_dance_state_t *state, void *user_data) {
 static void btn4_td_reset(tap_dance_state_t *state, void *user_data) {
     switch (btn4_td_action) {
         case TD_DOUBLE_TAP:
-            unregister_code16(mac ? MAC_DL : WIN_DL);
+            unregister_code16(mac ? CKC_MAC_DL : CKC_WIN_DL);
             break;
         case TD_SINGLE_HOLD:
             layer_off(_BTN4_FUNCTIONS);
@@ -335,7 +331,7 @@ static void btn4_td_reset(tap_dance_state_t *state, void *user_data) {
 static void btn5_td_tap(tap_dance_state_t *state, void *user_data) {
     btn5_td_action = get_tap_dance_action(state);
     if (btn5_td_action == TD_DOUBLE_TAP) {
-        register_code16(mac ? MAC_DR : WIN_DR);
+        register_code16(mac ? CKC_MAC_DR : CKC_WIN_DR);
         state->finished = true;
     }
 }
@@ -359,7 +355,7 @@ static void btn5_td_finished(tap_dance_state_t *state, void *user_data) {
 static void btn5_td_reset(tap_dance_state_t *state, void *user_data) {
     switch (btn5_td_action) {
         case TD_DOUBLE_TAP:
-            unregister_code16(mac ? MAC_DR : WIN_DR);
+            unregister_code16(mac ? CKC_MAC_DR : CKC_WIN_DR);
             break;
         case TD_SINGLE_HOLD:
             layer_off(_BTN5_FUNCTIONS);
