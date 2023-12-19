@@ -1,45 +1,63 @@
-/* TODO:
-  * OS switching - special layer accessed by pressing button 4 then button 5, then toggle with right click - Mac default
+/* TODO
+  * Figure out what to do about new Chrome window shortcut - get rid of it or implement Windows mode?
 */
 
 #include QMK_KEYBOARD_H
 
 // Mac utility function keycodes
-#define KC_LS LCTL(KC_LEFT)  // Move leftward one space
-#define KC_RS LCTL(KC_RGHT)  // Move rightward one space
-#define KC_MS LCTL(KC_UP)  // Activate Mission Control
-#define KC_DT KC_F11  // Show desktop
-#define KC_SS LSFT(LCMD(KC_4))  // Take a screenshot
-#define KC_MAC_COPY LCMD(KC_C)  // Copy
-#define KC_MAC_CUT LCMD(KC_X)  // Cut
-#define KC_MAC_PASTE LCMD(KC_V)  // Paste
+#define MAC_DL LCTL(KC_LEFT)        // Move leftward one space
+#define MAC_DR LCTL(KC_RGHT)        // Move rightward one space
+#define MAC_SW LCTL(KC_UP)          // Activate Mission Control
+#define MAC_SD KC_F11               // Show the desktop
+#define MAC_SS LSFT(LGUI(KC_4))     // Take a screenshot (selection)
+#define MAC_COPY LGUI(KC_C)         // Copy
+#define MAC_CUT LGUI(KC_X)          // Cut
+#define MAC_PASTE LGUI(KC_V)        // Paste
+
+// Windows utility function keycodes
+#define WIN_DL LGUI(LCTL(KC_LEFT))  // Move leftward one desktop
+#define WIN_DR LGUI(LCTL(KC_RGHT))  // Move rightward one desktop
+#define WIN_SW LGUI(KC_TAB)         // Activate Task View
+#define WIN_SD LGUI(KC_D)           // Show the desktop
+#define WIN_SS LSFT(LGUI(KC_S))     // Take a screenshot (Snipping Tool)
+#define WIN_COPY LCTL(KC_C)         // Copy
+#define WIN_CUT LCTL(KC_X)          // Cut
+#define WIN_PASTE LCTL(KC_V)        // Paste
 
 // Layers
 enum {
     _BASE,
     _DRAG_LOCK_CONTROL,
     _SCROLL_CONTROL,
+    _TOGGLE_MAC_WINDOWS,
     _DPI_CONTROL,
     _FUNCTIONS,
 };
 
-// Keycodes for drag lock feature
+// Custom keycodes
 enum {
     DRAG_LOCK_ON = SAFE_RANGE,
     DRAG_LOCK_OFF,
+    TOGGLE_MAC_WINDOWS,
+    SHOW_WINDOWS,
+    SHOW_DESKTOP,
+    SCREENSHOT,
+    CUT,
+    COPY,
+    PASTE,
 };
 
 // Tap Dance keycodes
 enum {
     TD_BTN2,  // 1: KC_BTN2; 2: KC_ENT; 3: New Chrome window; Hold: _DPI_CONTROL
-    TD_BTN4,  // 1: KC_BTN4; 2: KC_LS; Hold: _SCROLL_CONTROL + DRAG_SCROLL
-    TD_BTN5,  // 1: KC_BTN5; 2: KC_RS; Hold: _FUNCTIONS
+    TD_BTN4,  // 1: KC_BTN4; 2: Desktop left; Hold: _SCROLL_CONTROL + DRAG_SCROLL
+    TD_BTN5,  // 1: KC_BTN5; 2: Desktop right; Hold: _FUNCTIONS
 };
 
 // Keymap
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_BASE] = LAYOUT(  // Base layer
-        KC_BTN1, KC_MS, TD(TD_BTN2),
+        KC_BTN1, SHOW_WINDOWS, TD(TD_BTN2),
           TD(TD_BTN4), TD(TD_BTN5)
     ),
     [_DRAG_LOCK_CONTROL] = LAYOUT(  // Special layer for drag lock state
@@ -47,18 +65,25 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
           _______, _______
     ),
     [_SCROLL_CONTROL] = LAYOUT(  // Drag scroll, horizontal scroll with wheel, and enable drag lock
-        DRAG_LOCK_ON, KC_DT, KC_MAC_CUT,
-          _______, XXXXXXX
+        DRAG_LOCK_ON, SHOW_DESKTOP, CUT,
+          _______, MO(_TOGGLE_MAC_WINDOWS)
+    ),
+    [_TOGGLE_MAC_WINDOWS] = LAYOUT(  // Toggle between Mac and Windows modes
+        XXXXXXX, XXXXXXX, TOGGLE_MAC_WINDOWS,
+          _______, _______
     ),
     [_DPI_CONTROL] = LAYOUT(  // Cycle trackball DPI
         XXXXXXX, DPI_CONFIG, _______,
           XXXXXXX, XXXXXXX
     ),
     [_FUNCTIONS] = LAYOUT(  // Utility functions
-        KC_BTN3, KC_SS, KC_MAC_COPY,
-          KC_MAC_PASTE, _______
-    )
+        KC_BTN3, SCREENSHOT, COPY,
+          PASTE, _______
+    ),
 };
+
+// Mac / Windows mode
+static bool mac = true;
 
 // Tap Dance actions
 typedef enum {
@@ -111,7 +136,7 @@ static void unregister_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row
 
 /* QMK userspace callback functions */
 
-// Handle drag locking
+// Handle custom keycodes
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case DRAG_LOCK_ON:  // Enable drag lock
@@ -124,6 +149,53 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (!record->event.pressed) {
                 layer_off(_DRAG_LOCK_CONTROL);
                 unregister_code16(KC_BTN1);
+            }
+            return false;
+        case TOGGLE_MAC_WINDOWS:  // Toggle between Mac and Windows modes
+            if (record->event.pressed) {
+                mac ^= 1;
+            }
+            return false;
+        case SHOW_WINDOWS:  // Show all windows
+            if (record->event.pressed) {
+                register_code16(mac ? MAC_SW : WIN_SW);
+            } else {
+                unregister_code16(mac ? MAC_SW : WIN_SW);
+            }
+            return false;
+        case SHOW_DESKTOP:  // Show the desktop
+            if (record->event.pressed) {
+                register_code16(mac ? MAC_SD : WIN_SD);
+            } else {
+                unregister_code16(mac ? MAC_SD : WIN_SD);
+            }
+            return false;
+        case SCREENSHOT:  // Take a screenshot
+            if (record->event.pressed) {
+                register_code16(mac ? MAC_SS : WIN_SS);
+            } else {
+                unregister_code16(mac ? MAC_SS : WIN_SS);
+            }
+            return false;
+        case CUT:
+            if (record->event.pressed) {
+                register_code16(mac ? MAC_CUT : WIN_CUT);
+            } else {
+                unregister_code16(mac ? MAC_CUT : WIN_CUT);
+            }
+            return false;
+        case COPY:
+            if (record->event.pressed) {
+                register_code16(mac ? MAC_COPY : WIN_COPY);
+            } else {
+                unregister_code16(mac ? MAC_COPY : WIN_COPY);
+            }
+            return false;
+        case PASTE:
+            if (record->event.pressed) {
+                register_code16(mac ? MAC_PASTE : WIN_PASTE);
+            } else {
+                unregister_code16(mac ? MAC_PASTE : WIN_PASTE);
             }
             return false;
         default:
@@ -172,7 +244,7 @@ static td_action_t get_tap_dance_action(tap_dance_state_t *state) {
 static void btn2_td_tap(tap_dance_state_t *state, void *user_data) {
     btn2_td_action = get_tap_dance_action(state);
     if (btn2_td_action == TD_TRIPLE_TAP) {
-        SEND_STRING(SS_LCMD(" ") SS_DELAY(200) "chrome" SS_DELAY(200) SS_TAP(X_ENT) SS_DELAY(200) SS_LCMD("n"));
+        SEND_STRING(SS_LGUI(" ") SS_DELAY(200) "chrome" SS_DELAY(200) SS_TAP(X_ENT) SS_DELAY(200) SS_LGUI("n"));
         state->finished = true;
     }
 }
@@ -214,7 +286,7 @@ static void btn2_td_reset(tap_dance_state_t *state, void *user_data) {
 static void btn4_td_tap(tap_dance_state_t *state, void *user_data) {
     btn4_td_action = get_tap_dance_action(state);
     if (btn4_td_action == TD_DOUBLE_TAP) {
-        register_code16(KC_LS);
+        register_code16(mac ? MAC_DL : WIN_DL);
         state->finished = true;
     }
 }
@@ -239,7 +311,7 @@ static void btn4_td_finished(tap_dance_state_t *state, void *user_data) {
 static void btn4_td_reset(tap_dance_state_t *state, void *user_data) {
     switch (btn4_td_action) {
         case TD_DOUBLE_TAP:
-            unregister_code16(KC_LS);
+            unregister_code16(mac ? MAC_DL : WIN_DL);
             break;
         case TD_SINGLE_HOLD:
             layer_off(_SCROLL_CONTROL);
@@ -255,7 +327,7 @@ static void btn4_td_reset(tap_dance_state_t *state, void *user_data) {
 static void btn5_td_tap(tap_dance_state_t *state, void *user_data) {
     btn5_td_action = get_tap_dance_action(state);
     if (btn5_td_action == TD_DOUBLE_TAP) {
-        register_code16(KC_RS);
+        register_code16(mac ? MAC_DR : WIN_DR);
         state->finished = true;
     }
 }
@@ -279,7 +351,7 @@ static void btn5_td_finished(tap_dance_state_t *state, void *user_data) {
 static void btn5_td_reset(tap_dance_state_t *state, void *user_data) {
     switch (btn5_td_action) {
         case TD_DOUBLE_TAP:
-            unregister_code16(KC_RS);
+            unregister_code16(mac ? MAC_DR : WIN_DR);
             break;
         case TD_SINGLE_HOLD:
             layer_off(_FUNCTIONS);
