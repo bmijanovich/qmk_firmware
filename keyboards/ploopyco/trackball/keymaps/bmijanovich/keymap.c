@@ -27,11 +27,11 @@
 // Layers
 enum {
     _BASE,
-    _DRAG_LOCK_CONTROL,
-    _SCROLL_CONTROL,
-    _TOGGLE_MAC_WINDOWS,
+    _DRAG_LOCK,
     _DPI_CONTROL,
-    _FUNCTIONS,
+    _BTN4_FUNCTIONS,
+    _BTN5_FUNCTIONS,
+    _SYSTEM,
 };
 
 // Custom keycodes
@@ -50,8 +50,8 @@ enum {
 // Tap Dance keycodes
 enum {
     TD_BTN2,  // 1: KC_BTN2; 2: KC_ENT; 3: New Chrome window; Hold: _DPI_CONTROL
-    TD_BTN4,  // 1: KC_BTN4; 2: Desktop left; Hold: _SCROLL_CONTROL + DRAG_SCROLL
-    TD_BTN5,  // 1: KC_BTN5; 2: Desktop right; Hold: _FUNCTIONS
+    TD_BTN4,  // 1: KC_BTN4; 2: Desktop left; Hold: _BTN4_FUNCTIONS + DRAG_SCROLL + horizontal wheel scroll
+    TD_BTN5,  // 1: KC_BTN5; 2: Desktop right; Hold: _BTN5_FUNCTIONS
 };
 
 // Keymap
@@ -60,25 +60,25 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_BTN1, SHOW_WINDOWS, TD(TD_BTN2),
           TD(TD_BTN4), TD(TD_BTN5)
     ),
-    [_DRAG_LOCK_CONTROL] = LAYOUT(  // Special layer for drag lock state
+    [_DRAG_LOCK] = LAYOUT(  // Special layer for drag lock state
         DRAG_LOCK_OFF, _______, _______,
-          _______, _______
-    ),
-    [_SCROLL_CONTROL] = LAYOUT(  // Drag scroll, horizontal scroll with wheel, and enable drag lock
-        DRAG_LOCK_ON, SHOW_DESKTOP, CUT,
-          _______, MO(_TOGGLE_MAC_WINDOWS)
-    ),
-    [_TOGGLE_MAC_WINDOWS] = LAYOUT(  // Toggle between Mac and Windows modes
-        XXXXXXX, XXXXXXX, TOGGLE_MAC_WINDOWS,
           _______, _______
     ),
     [_DPI_CONTROL] = LAYOUT(  // Cycle trackball DPI
         XXXXXXX, DPI_CONFIG, _______,
           XXXXXXX, XXXXXXX
     ),
-    [_FUNCTIONS] = LAYOUT(  // Utility functions
+    [_BTN4_FUNCTIONS] = LAYOUT(  // Drag scroll, horizontal scroll with wheel, drag lock and utility functions
+        DRAG_LOCK_ON, SHOW_DESKTOP, CUT,
+          _______, MO(_SYSTEM)
+    ),
+    [_BTN5_FUNCTIONS] = LAYOUT(  // Utility functions
         KC_BTN3, SCREENSHOT, COPY,
           PASTE, _______
+    ),
+    [_SYSTEM] = LAYOUT(  // Toggle between Mac and Windows modes, reset and bootloader
+        QK_RBT, QK_BOOT, TOGGLE_MAC_WINDOWS,
+          _______, _______
     ),
 };
 
@@ -142,12 +142,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case DRAG_LOCK_ON:  // Enable drag lock
             if (record->event.pressed) {
                 register_code16(KC_BTN1);
-                layer_on(_DRAG_LOCK_CONTROL);
+                layer_on(_DRAG_LOCK);
             }
             return false;
         case DRAG_LOCK_OFF:  // Disable drag lock
             if (!record->event.pressed) {
-                layer_off(_DRAG_LOCK_CONTROL);
+                layer_off(_DRAG_LOCK);
                 unregister_code16(KC_BTN1);
             }
             return false;
@@ -215,13 +215,10 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     }
 }
 
-// Horizonal scroll with wheel on _SCROLL_CONTROL layer
+// Horizonal scroll with wheel on _BTN4_FUNCTIONS layer
 bool encoder_update_user(uint8_t index, bool clockwise) {
-    if (IS_LAYER_ON(_SCROLL_CONTROL)) {
-        report_mouse_t mouse_report = pointing_device_get_report();
-        mouse_report.h = clockwise ? -1 : 1;
-        pointing_device_set_report(mouse_report);
-        pointing_device_send();
+    if (IS_LAYER_ON(_BTN4_FUNCTIONS)) {
+        tap_code(clockwise ? KC_WH_L : KC_WH_R);
         return false;
     } else {
         return true;
@@ -299,7 +296,7 @@ static void btn4_td_finished(tap_dance_state_t *state, void *user_data) {
             tap_code16(KC_BTN4);
             break;
         case TD_SINGLE_HOLD:
-            layer_on(_SCROLL_CONTROL);
+            layer_on(_BTN4_FUNCTIONS);
             register_custom_keycode(DRAG_SCROLL, 3, 0);
             break;
         default:
@@ -314,7 +311,7 @@ static void btn4_td_reset(tap_dance_state_t *state, void *user_data) {
             unregister_code16(mac ? MAC_DL : WIN_DL);
             break;
         case TD_SINGLE_HOLD:
-            layer_off(_SCROLL_CONTROL);
+            layer_off(_BTN4_FUNCTIONS);
             unregister_custom_keycode(DRAG_SCROLL, 3, 0);
             break;
         default:
@@ -340,7 +337,7 @@ static void btn5_td_finished(tap_dance_state_t *state, void *user_data) {
             tap_code16(KC_BTN5);
             break;
         case TD_SINGLE_HOLD:
-            layer_on(_FUNCTIONS);
+            layer_on(_BTN5_FUNCTIONS);
             break;
         default:
             break;
@@ -354,7 +351,7 @@ static void btn5_td_reset(tap_dance_state_t *state, void *user_data) {
             unregister_code16(mac ? MAC_DR : WIN_DR);
             break;
         case TD_SINGLE_HOLD:
-            layer_off(_FUNCTIONS);
+            layer_off(_BTN5_FUNCTIONS);
             break;
         default:
             break;
