@@ -76,17 +76,7 @@ static td_action_t btn4_td_action = TD_NONE;
 static td_action_t btn5_td_action = TD_NONE;
 
 // Dummy keyrecord_t for hooking process_record_kb() with custom keycodes
-static keyrecord_t dummy_record = {
-    .event = {
-        .key = {
-            .col = 0,
-            .row = 0,
-            },
-        .pressed = false,
-        .time = 0,
-    },
-    .tap = {0},
-};
+static keyrecord_t dummy_record;
 
 // QMK userspace callback functions
 bool process_record_user(uint16_t keycode, keyrecord_t *record);
@@ -94,16 +84,16 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record);
 bool encoder_update_user(uint8_t index, bool clockwise);
 
 // Tap Dance callback functions
-td_action_t get_tap_dance_action(tap_dance_state_t *state);
-void btn2_td_tap(tap_dance_state_t *state, void *user_data);
-void btn2_td_finished(tap_dance_state_t *state, void *user_data) ;
-void btn2_td_reset(tap_dance_state_t *state, void *user_data);
-void btn4_td_tap(tap_dance_state_t *state, void *user_data);
-void btn4_td_finished(tap_dance_state_t *state, void *user_data);
-void btn4_td_reset(tap_dance_state_t *state, void *user_data);
-void btn5_td_tap(tap_dance_state_t *state, void *user_data);
-void btn5_td_finished(tap_dance_state_t *state, void *user_data);
-void btn5_td_reset(tap_dance_state_t *state, void *user_data);
+static td_action_t get_tap_dance_action(tap_dance_state_t *state);
+static void btn2_td_tap(tap_dance_state_t *state, void *user_data);
+static void btn2_td_finished(tap_dance_state_t *state, void *user_data) ;
+static void btn2_td_reset(tap_dance_state_t *state, void *user_data);
+static void btn4_td_tap(tap_dance_state_t *state, void *user_data);
+static void btn4_td_finished(tap_dance_state_t *state, void *user_data);
+static void btn4_td_reset(tap_dance_state_t *state, void *user_data);
+static void btn5_td_tap(tap_dance_state_t *state, void *user_data);
+static void btn5_td_finished(tap_dance_state_t *state, void *user_data);
+static void btn5_td_reset(tap_dance_state_t *state, void *user_data);
 
 // Associate tap dance keys with their functionality
 tap_dance_action_t tap_dance_actions[] = {
@@ -113,9 +103,9 @@ tap_dance_action_t tap_dance_actions[] = {
 };
 
 // Functions for sending custom keycodes, since QMK functions can't register them
-void setup_dummy_record(uint8_t col, uint8_t row, bool pressed);
-void register_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row);
-void unregister_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row);
+static void setup_dummy_record(uint8_t col, uint8_t row, bool pressed);
+static void register_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row);
+static void unregister_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row);
 
 
 
@@ -171,7 +161,7 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
 /* Tap Dance callback functions */
 
 // Suports single/double/triple taps and single hold; favors instant hold when interrupted
-td_action_t get_tap_dance_action(tap_dance_state_t *state) {
+static td_action_t get_tap_dance_action(tap_dance_state_t *state) {
     if (state->count == 1) return (state->pressed) ? TD_SINGLE_HOLD : TD_SINGLE_TAP;
     else if (state->count == 2) return TD_DOUBLE_TAP;
     else if (state->count == 3) return TD_TRIPLE_TAP;
@@ -179,7 +169,7 @@ td_action_t get_tap_dance_action(tap_dance_state_t *state) {
 }
 
 // Mouse button 2 Tap Dance on-each-tap callback
-void btn2_td_tap(tap_dance_state_t *state, void *user_data) {
+static void btn2_td_tap(tap_dance_state_t *state, void *user_data) {
     btn2_td_action = get_tap_dance_action(state);
     if (btn2_td_action == TD_TRIPLE_TAP) {
         SEND_STRING(SS_LCMD(" ") SS_DELAY(200) "chrome" SS_DELAY(200) SS_TAP(X_ENT) SS_DELAY(200) SS_LCMD("n"));
@@ -188,7 +178,7 @@ void btn2_td_tap(tap_dance_state_t *state, void *user_data) {
 }
 
 // Mouse button 2 Tap Dance on-dance-finished callback
-void btn2_td_finished(tap_dance_state_t *state, void *user_data) {
+static void btn2_td_finished(tap_dance_state_t *state, void *user_data) {
     btn2_td_action = get_tap_dance_action(state);
     switch (btn2_td_action) {
         case TD_SINGLE_TAP:
@@ -206,7 +196,7 @@ void btn2_td_finished(tap_dance_state_t *state, void *user_data) {
 }
 
 // Mouse button 2 Tap Dance on-dance-reset callback
-void btn2_td_reset(tap_dance_state_t *state, void *user_data) {
+static void btn2_td_reset(tap_dance_state_t *state, void *user_data) {
     switch (btn2_td_action) {
         case TD_DOUBLE_TAP:
             unregister_code(KC_ENT);
@@ -221,7 +211,7 @@ void btn2_td_reset(tap_dance_state_t *state, void *user_data) {
 }
 
 // Mouse button 4 Tap Dance on-each-tap callback
-void btn4_td_tap(tap_dance_state_t *state, void *user_data) {
+static void btn4_td_tap(tap_dance_state_t *state, void *user_data) {
     btn4_td_action = get_tap_dance_action(state);
     if (btn4_td_action == TD_DOUBLE_TAP) {
         register_code16(KC_LS);
@@ -230,7 +220,7 @@ void btn4_td_tap(tap_dance_state_t *state, void *user_data) {
 }
 
 // Mouse button 4 Tap Dance on-dance-finished callback
-void btn4_td_finished(tap_dance_state_t *state, void *user_data) {
+static void btn4_td_finished(tap_dance_state_t *state, void *user_data) {
     btn4_td_action = get_tap_dance_action(state);
     switch (btn4_td_action) {
         case TD_SINGLE_TAP:
@@ -246,7 +236,7 @@ void btn4_td_finished(tap_dance_state_t *state, void *user_data) {
 }
 
 // Mouse button 4 Tap Dance on-dance-reset callback
-void btn4_td_reset(tap_dance_state_t *state, void *user_data) {
+static void btn4_td_reset(tap_dance_state_t *state, void *user_data) {
     switch (btn4_td_action) {
         case TD_DOUBLE_TAP:
             unregister_code16(KC_LS);
@@ -262,7 +252,7 @@ void btn4_td_reset(tap_dance_state_t *state, void *user_data) {
 }
 
 // Mouse button 5 Tap Dance on-each-tap callback
-void btn5_td_tap(tap_dance_state_t *state, void *user_data) {
+static void btn5_td_tap(tap_dance_state_t *state, void *user_data) {
     btn5_td_action = get_tap_dance_action(state);
     if (btn5_td_action == TD_DOUBLE_TAP) {
         register_code16(KC_RS);
@@ -271,7 +261,7 @@ void btn5_td_tap(tap_dance_state_t *state, void *user_data) {
 }
 
 // Mouse button 5 Tap Dance on-dance-finished callback
-void btn5_td_finished(tap_dance_state_t *state, void *user_data) {
+static void btn5_td_finished(tap_dance_state_t *state, void *user_data) {
     btn5_td_action = get_tap_dance_action(state);
     switch (btn5_td_action) {
         case TD_SINGLE_TAP:
@@ -286,7 +276,7 @@ void btn5_td_finished(tap_dance_state_t *state, void *user_data) {
 }
 
 // Mouse button 5 Tap Dance on-dance-reset callback
-void btn5_td_reset(tap_dance_state_t *state, void *user_data) {
+static void btn5_td_reset(tap_dance_state_t *state, void *user_data) {
     switch (btn5_td_action) {
         case TD_DOUBLE_TAP:
             unregister_code16(KC_RS);
@@ -305,7 +295,7 @@ void btn5_td_reset(tap_dance_state_t *state, void *user_data) {
 /* Functions for sending custom keycodes */
 
 // Setup dummy_record for process_record_kb()
-void setup_dummy_record(uint8_t col, uint8_t row, bool pressed) {
+static void setup_dummy_record(uint8_t col, uint8_t row, bool pressed) {
     dummy_record.event.key.col = col;
     dummy_record.event.key.row = row;
     dummy_record.event.pressed = pressed;
@@ -313,13 +303,13 @@ void setup_dummy_record(uint8_t col, uint8_t row, bool pressed) {
 }
 
 // Register a custom keycode with process_record_kb()
-void register_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row) {
+static void register_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row) {
     setup_dummy_record(col, row, true);
     process_record_kb(keycode, &dummy_record);
 }
 
 // Unregister a custom keycode with process_record_kb()
-void unregister_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row) {
+static void unregister_custom_keycode(uint16_t keycode, uint8_t col, uint8_t row) {
     setup_dummy_record(col, row, false);
     process_record_kb(keycode, &dummy_record);
 }
