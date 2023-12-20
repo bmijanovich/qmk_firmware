@@ -1,5 +1,8 @@
 /* TODO
   * Figure out what to do about new Chrome window shortcut - get rid of it or implement Windows mode?
+  * Backport Adept semaphore drag scrolling code
+  * Check and update comments
+  * Write a readme
 */
 
 #include QMK_KEYBOARD_H
